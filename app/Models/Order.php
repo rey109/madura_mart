@@ -13,4 +13,14 @@ class Order extends Model
     {
         return $this->belongsTo(Client::class, 'id_pelanggan');
     }
+
+    public function details()
+    {
+        return $this->hasMany(Order_Details::class, 'id_pemesanan');
+    }
+
+    public function delivery()
+    {
+        return $this->hasOne(Delivery::class, 'id_pemesanan');
+    }
 }

@@ -12,4 +12,9 @@ class Purchase extends Model
     {
         return $this->belongsTo(Distributor::class, 'id_distributor');
     }
+
+    public function details()
+    {
+        return $this->hasMany(Purchase_Detail::class, 'id_pembelian');
+    }
 }

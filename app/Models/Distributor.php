@@ -12,4 +12,9 @@ class Distributor extends Model
         'alamat_distributor',
         'notelepon_distributor',
     ];
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'id_distributor');
+    }
 }

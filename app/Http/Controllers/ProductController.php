@@ -39,7 +39,7 @@ class ProductController extends Controller
             if ($request->hasFile('foto_barang')) {
                 $file = $request->file('foto_barang');
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('products', $filename, 'public');
+                $path = $file->storeAs('images/products', $filename, 'public');
                 $data['foto_barang'] = $path;
             }
             
@@ -84,16 +84,16 @@ class ProductController extends Controller
                 // Delete old image if exists
                 // Move old image to recycle_bin if exists
                 if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
-                    if (!Storage::disk('public')->exists('recycle_bin')) {
-                         Storage::disk('public')->makeDirectory('recycle_bin');
+                    if (!Storage::disk('public')->exists('images/recycle_bin')) {
+                         Storage::disk('public')->makeDirectory('images/recycle_bin');
                     }
                     $filename = basename($product->foto_barang);
-                    Storage::disk('public')->move($product->foto_barang, 'recycle_bin/' . time() . '_' . $filename);
+                    Storage::disk('public')->move($product->foto_barang, 'images/recycle_bin/' . time() . '_' . $filename);
                 }
                 
                 $file = $request->file('foto_barang');
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('products', $filename, 'public');
+                $path = $file->storeAs('images/products', $filename, 'public');
                 $data['foto_barang'] = $path;
             }
             
@@ -161,11 +161,11 @@ class ProductController extends Controller
 
             // Move image to recycle_bin before permanent deletion (Final Backup)
             if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
-                if (!Storage::disk('public')->exists('recycle_bin')) {
-                        Storage::disk('public')->makeDirectory('recycle_bin');
+                if (!Storage::disk('public')->exists('images/recycle_bin')) {
+                        Storage::disk('public')->makeDirectory('images/recycle_bin');
                 }
                 $filename = basename($product->foto_barang);
-                Storage::disk('public')->move($product->foto_barang, 'recycle_bin/' . time() . '_' . $filename);
+                Storage::disk('public')->move($product->foto_barang, 'images/recycle_bin/' . time() . '_' . $filename);
             }
             
             $product->forceDelete();
