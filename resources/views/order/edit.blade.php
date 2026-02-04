@@ -44,17 +44,19 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Status Pemesanan</label>
                                     <select class="form-control" name="status_pemesanan" required>
-                                        <option value="Proses" @if($data->status_pemesanan == 'Proses') selected @endif>Proses</option>
-                                        <option value="Selesai" @if($data->status_pemesanan == 'Selesai') selected @endif>Selesai</option>
-                                        <option value="Batal" @if($data->status_pemesanan == 'Batal') selected @endif>Batal</option>
+                                        <option value="draft" @if($data->status_pemesanan == 'draft') selected @endif>Draft</option>
+                                        <option value="dipesan" @if($data->status_pemesanan == 'dipesan') selected @endif>Dipesan (Pending)</option>
+                                        <option value="diproses" @if($data->status_pemesanan == 'diproses') selected @endif>Diproses (Processing)</option>
+                                        <option value="selesai" @if($data->status_pemesanan == 'selesai') selected @endif>Selesai (Completed)</option>
+                                        <option value="dibatalkan pembeli" @if($data->status_pemesanan == 'dibatalkan pembeli') selected @endif>Dibatalkan Pembeli</option>
+                                        <option value="dibatalkan penjual" @if($data->status_pemesanan == 'dibatalkan penjual') selected @endif>Dibatalkan Penjual</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Metode Pembayaran</label>
                                     <select class="form-control" name="metode_pembayaran" required>
-                                        <option value="Tunai" @if($data->metode_pembayaran == 'Tunai') selected @endif>Tunai</option>
-                                        <option value="Transfer" @if($data->metode_pembayaran == 'Transfer') selected @endif>Transfer</option>
-                                        <option value="COD" @if($data->metode_pembayaran == 'COD') selected @endif>COD</option>
+                                        <option value="cod" @if($data->metode_pembayaran == 'cod') selected @endif>COD (Cash)</option>
+                                        <option value="tf" @if($data->metode_pembayaran == 'tf') selected @endif>Transfer</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">

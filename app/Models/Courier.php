@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Courier extends Model
 {
     protected $fillable = ['nama_kurir', 'notelepon_kurir', 'plat_kendaraan'];
+
+    public function deliveries()
+    {
+        return $this->hasMany(Delivery::class, 'id_kurir');
+    }
 }

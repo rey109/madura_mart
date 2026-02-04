@@ -66,6 +66,9 @@
                                                 <p class="text-xs font-weight-bold mb-0">Rp {{ number_format($data->total_bayar) }}</p>
                                             </td>
                                             <td class="align-middle text-center">
+                                                <button type="button" class="btn btn-link text-primary px-2 mb-0" data-bs-toggle="modal" data-bs-target="#detailModal{{ $data->id }}" title="View Details">
+                                                    <i class="fas fa-eye text-primary" style="font-size: 18px;"></i>
+                                                </button>
                                                 <a href="{{ route('purchase.edit', $data->id) }}" class="btn btn-link text-info px-2 mb-0" data-toggle="tooltip" title="Edit">
                                                     <i class="fas fa-pencil-alt text-info" style="font-size: 18px;"></i>
                                                 </a>
@@ -76,6 +79,61 @@
                                                         <i class="fas fa-trash text-danger" style="font-size: 18px;"></i>
                                                     </button>
                                                 </form>
+
+                                                <!-- Detail Modal -->
+                                                <div class="modal fade" id="detailModal{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel{{ $data->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="detailModalLabel{{ $data->id }}">Detail Pembelian: {{ $data->no_nota }}</h5>
+                                                                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body text-start">
+                                                                <div class="row mb-3">
+                                                                    <div class="col-4">
+                                                                        <p class="text-xs text-secondary mb-0">Tanggal:</p>
+                                                                        <p class="text-sm font-weight-bold">{{ $data->tgl_nota }}</p>
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <p class="text-xs text-secondary mb-0">Distributor:</p>
+                                                                        <p class="text-sm font-weight-bold">{{ $data->distributor->nama_distributor ?? '-' }}</p>
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <p class="text-xs text-secondary mb-0">Total Bayar:</p>
+                                                                        <p class="text-sm font-weight-bold">Rp {{ number_format($data->total_bayar) }}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="table-responsive">
+                                                                    <table class="table align-items-center mb-0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Item</th>
+                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Cost</th>
+                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Qty</th>
+                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">Subtotal</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($data->details as $detail)
+                                                                            <tr>
+                                                                                <td><p class="text-xs font-weight-bold mb-0 text-start">{{ $detail->product->nama_barang ?? 'Unknown' }}</p></td>
+                                                                                <td class="text-center"><p class="text-xs font-weight-bold mb-0">Rp {{ number_format($detail->harga_beli) }}</p></td>
+                                                                                <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $detail->jumlah_beli }}</p></td>
+                                                                                <td class="text-end"><p class="text-xs font-weight-bold mb-0">Rp {{ number_format($detail->subtotal) }}</p></td>
+                                                                            </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

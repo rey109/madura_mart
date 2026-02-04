@@ -18,32 +18,67 @@
     </nav>
 
     <div class="container-fluid py-4">
+        @if(session('error'))
+        <div class="alert alert-danger text-white" role="alert">
+            {{ session('error') }}
+        </div>
+        @endif
+        
         <div class="row justify-content-center">
-            <div class="col-12 col-xl-8">
+            <div class="col-12 col-xl-12">
                 <div class="card mb-4">
                     <div class="card-header pb-0">
-                        <h6>Add New {{ $title }}</h6>
+                        <h6>New Sale Transaction</h6>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('sale.store') }}" method="POST">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">No Struk</label>
+                                    <label class="form-label">Receipt Number (No Struk)</label>
                                     <input type="text" class="form-control" name="no_struk" placeholder="Enter Receipt Number" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tanggal Jual</label>
-                                    <input type="date" class="form-control" name="tgl_jual" required>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Total Bayar</label>
-                                    <input type="number" class="form-control" name="total_bayar" placeholder="Enter Total Amount" required>
+                                    <label class="form-label">Date (Tanggal Jual)</label>
+                                    <input type="date" class="form-control" name="tgl_jual" value="{{ date('Y-m-d') }}" required>
                                 </div>
                             </div>
+                            
+                            <hr class="horizontal dark my-3">
+                            <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-3">Items list</h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table align-items-center mb-0" id="itemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Product</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Stock</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Quantity</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Subtotal</th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsBody">
+                                        <!-- Rows added by JS -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4" class="text-end font-weight-bold">Grand Total</td>
+                                            <td class="font-weight-bold" id="grandTotal">Rp 0</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-3 mb-3">
+                                <button type="button" class="btn btn-sm btn-info mb-0" onclick="addItem()">+ Add Item</button>
+                            </div>
+
                             <div class="text-end mt-4">
                                 <a href="{{ route('sale.index') }}" class="btn bg-gradient-secondary me-3">Cancel</a>
-                                <button type="submit" class="btn bg-gradient-primary">Save</button>
+                                <button type="submit" class="btn bg-gradient-primary">Process Sale</button>
                             </div>
                         </form>
                     </div>
@@ -51,4 +86,103 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Available products data from controller
+        const products = @json($products);
+        
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+        }
+        
+        function addItem() {
+            const tableBody = document.getElementById('itemsBody');
+            const rowCount = tableBody.rows.length;
+            const row = tableBody.insertRow(rowCount);
+            
+            // Product Select
+            let productOptions = '<option value="">Select Product</option>';
+            products.forEach(p => {
+                productOptions += `<option value="${p.id}" data-price="${p.harga_jual}" data-stock="${p.stok}">${p.nama_barang}</option>`;
+            });
+            
+            row.innerHTML = `
+                <td>
+                    <select class="form-control form-control-sm product-select" name="products[]" required onchange="updateRow(this)">
+                        ${productOptions}
+                    </select>
+                </td>
+                <td><span class="text-sm stock-label">-</span></td>
+                <td>
+                    <input type="text" class="form-control form-control-sm price-input" readonly>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm qty-input" name="quantities[]" min="1" value="1" required onchange="calculateSubtotal(this)" onkeyup="calculateSubtotal(this)">
+                </td>
+                <td class="subtotal-label text-sm font-weight-bold">Rp 0</td>
+                <td>
+                    <button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeItem(this)">
+                        <i class="far fa-trash-alt me-2"></i>Delete
+                    </button>
+                </td>
+            `;
+        }
+        
+        function updateRow(selectElement) {
+            const row = selectElement.closest('tr');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const stock = selectedOption.getAttribute('data-stock');
+            
+            row.querySelector('.price-input').value = price;
+            // Format price for display could be handled if needed, for now raw value
+            
+            row.querySelector('.stock-label').textContent = stock || '-';
+            
+            calculateSubtotal(selectElement);
+        }
+        
+        function calculateSubtotal(element) {
+            const row = element.closest('tr');
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const stock = parseFloat(row.querySelector('.stock-label').textContent) || 0;
+            const stockLabel = row.querySelector('.stock-label');
+            
+            // Stock Validation Highlight
+            if (qty > stock && stock !== '-') {
+                 stockLabel.classList.add('text-danger');
+                 stockLabel.innerHTML = `${stock} (Insufficient!)`;
+            } else if (stock !== '-') {
+                 stockLabel.classList.remove('text-danger');
+                 stockLabel.textContent = stock;
+            }
+
+            const subtotal = price * qty;
+            row.querySelector('.subtotal-label').textContent = formatRupiah(subtotal);
+            
+            updateGrandTotal();
+        }
+        
+        function updateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                total += price * qty;
+            });
+            document.getElementById('grandTotal').textContent = formatRupiah(total);
+        }
+        
+        function removeItem(button) {
+            const row = button.closest('tr');
+            row.remove();
+            updateGrandTotal();
+        }
+        
+        // Add one initial row
+        document.addEventListener('DOMContentLoaded', () => {
+             addItem();
+        });
+    </script>
 @endsection
