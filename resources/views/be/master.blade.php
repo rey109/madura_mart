@@ -72,7 +72,7 @@
   @if ($title === 'Delivery')
     @yield('delivery')
   @endif
-  @if ($title === 'Products')
+  @if ($title === 'Products' || $title === 'Product Trash')
     @yield('product')
   @endif
   @if ($title === 'Purchase')

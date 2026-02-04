@@ -82,8 +82,13 @@ class ProductController extends Controller
             // Handle file upload if new file is provided
             if ($request->hasFile('foto_barang')) {
                 // Delete old image if exists
+                // Move old image to recycle_bin if exists
                 if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
-                    Storage::disk('public')->delete($product->foto_barang);
+                    if (!Storage::disk('public')->exists('recycle_bin')) {
+                         Storage::disk('public')->makeDirectory('recycle_bin');
+                    }
+                    $filename = basename($product->foto_barang);
+                    Storage::disk('public')->move($product->foto_barang, 'recycle_bin/' . time() . '_' . $filename);
                 }
                 
                 $file = $request->file('foto_barang');
@@ -112,23 +117,61 @@ class ProductController extends Controller
             $product = Products::findOrFail($id);
             $nama = $product->nama_barang;
             
-            // Delete image file if exists
-            if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
-                Storage::disk('public')->delete($product->foto_barang);
-            }
+            // For Soft Deletes, we DO NOT move the file yet.
+            // The file stays in place so it can be shown in the Trash view.
             
             $product->delete();
-            return redirect()->route('product.index')->with('hapus', 'Produk ' . $nama . ' berhasil dihapus');
+            return redirect()->route('product.index')->with('hapus', 'Produk ' . $nama . ' berhasil dipindahkan ke Sampah');
         } catch (ModelNotFoundException $e) {
             return redirect()->route('product.index')->with('error', 'Produk tidak ditemukan atau sudah dihapus.');
         } catch (QueryException $e) {
-            // Check for foreign key constraint (e.g., used in transaction details)
-           if ($e->errorInfo[1] == 1451) {
+            if ($e->errorInfo[1] == 1451) {
                  return redirect()->route('product.index')->with('error', 'Gagal: Produk tidak bisa dihapus karena sudah ada transaksi.');
             }
             return redirect()->route('product.index')->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         } catch (Throwable $e) {
             return redirect()->route('product.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function trash()
+    {
+        return view('product.trash', [
+            'title' => 'Product Trash',
+            'datas' => Products::onlyTrashed()->paginate(50)
+        ]);
+    }
+
+    public function restore(string $id)
+    {
+        try {
+            $product = Products::onlyTrashed()->findOrFail($id);
+            $product->restore();
+            return redirect()->route('product.trash')->with('restore', 'Produk ' . $product->nama_barang . ' berhasil dikembalikan');
+        } catch (Throwable $e) {
+            return redirect()->route('product.trash')->with('error', 'Gagal restore: ' . $e->getMessage());
+        }
+    }
+
+    public function forceDelete(string $id)
+    {
+        try {
+            $product = Products::onlyTrashed()->findOrFail($id);
+            $nama = $product->nama_barang;
+
+            // Move image to recycle_bin before permanent deletion (Final Backup)
+            if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
+                if (!Storage::disk('public')->exists('recycle_bin')) {
+                        Storage::disk('public')->makeDirectory('recycle_bin');
+                }
+                $filename = basename($product->foto_barang);
+                Storage::disk('public')->move($product->foto_barang, 'recycle_bin/' . time() . '_' . $filename);
+            }
+            
+            $product->forceDelete();
+            return redirect()->route('product.trash')->with('hapus', 'Produk ' . $nama . ' dihapus permanen');
+        } catch (Throwable $e) {
+            return redirect()->route('product.trash')->with('error', 'Gagal hapus permanen: ' . $e->getMessage());
         }
     }
 }

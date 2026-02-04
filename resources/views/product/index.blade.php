@@ -19,6 +19,9 @@
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center">
                         <div class="mx-3">
+                            <a href="{{ route('product.trash') }}" class="btn btn-secondary btn-sm mb-0 me-2" title="Lihat Sampah">
+                                <i class="fas fa-trash me-1"></i> Refund
+                            </a>
                             <a href="{{ route('product.create') }}" class="btn bg-gradient-primary btn-sm mb-0">Add New {{ $title }}</a>
                         </div>
                     </li>
