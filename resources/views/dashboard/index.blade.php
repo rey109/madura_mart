@@ -189,7 +189,7 @@
                       <td>
                         <div class="d-flex px-2 py-1">
                           <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">#{{ $order->id_pesanan }}</h6>
+                            <h6 class="mb-0 text-sm">#{{ $order->id }}</h6>
                           </div>
                         </div>
                       </td>
@@ -203,7 +203,7 @@
                          <span class="text-xs font-weight-bold"> Rp {{ number_format($order->total_harga, 0, ',', '.') }} </span>
                       </td>
                       <td class="align-middle">
-                        <a href="{{ route('order.show', $order->id_pesanan) }}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Order">
+                        <a href="{{ route('order.show', $order->id) }}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Order">
                           View
                         </a>
                       </td>

@@ -25,7 +25,7 @@
                         <h6>Edit {{ $title }}</h6>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('user.update', $data->id) }}" method="POST">
+                        <form action="{{ route('user.update', $data->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="mb-3">
@@ -39,6 +39,30 @@
                             <div class="mb-3">
                                 <label class="form-label">Password (leave blank if not changing)</label>
                                 <input type="password" class="form-control" name="password" placeholder="Enter New Password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="admin" {{ $data->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="courier" {{ $data->role == 'courier' ? 'selected' : '' }}>Courier</option>
+                                    <option value="owner" {{ $data->role == 'owner' ? 'selected' : '' }}>Owner</option>
+                                    <option value="customer" {{ $data->role == 'customer' ? 'selected' : '' }}>Customer</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" name="no_telepon" value="{{ $data->no_telepon }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" name="alamat" rows="3" required>{{ $data->alamat }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Current Photo</label>
+                                <div class="mb-2">
+                                    <img src="{{ $data->foto && $data->foto != 'default.png' ? asset('images/users/' . $data->foto) : asset('assets/img/team-2.jpg') }}" class="avatar avatar-lg me-3" alt="user photo">
+                                </div>
+                                <input type="file" class="form-control" name="foto">
                             </div>
                             <div class="text-end mt-4">
                                 <a href="{{ route('user.index') }}" class="btn bg-gradient-secondary me-3">Cancel</a>

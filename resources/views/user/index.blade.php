@@ -40,8 +40,11 @@
                                 <thead>
                                     <tr>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Foto</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Name</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Email</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Role</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Phone</th>
                                         <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                                     </tr>
                                 </thead>
@@ -52,10 +55,23 @@
                                                 <p class="text-xs font-weight-bold mb-0 ps-3">{{ $nmr + 1 }}</p>
                                             </td>
                                             <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div>
+                                                        <img src="{{ $data->foto && $data->foto != 'default.png' ? asset('images/users/' . $data->foto) : asset('assets/img/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user1">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
                                                 <p class="text-xs font-weight-bold mb-0">{{ $data->name }}</p>
                                             </td>
                                             <td>
                                                 <p class="text-xs font-weight-bold mb-0">{{ $data->email }}</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">{{ ucfirst($data->role) }}</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">{{ $data->no_telepon }}</p>
                                             </td>
                                             <td class="align-middle text-center">
                                                 <a href="{{ route('user.edit', $data->id) }}" class="btn btn-link text-info px-2 mb-0" data-toggle="tooltip" title="Edit">

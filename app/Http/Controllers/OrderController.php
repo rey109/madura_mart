@@ -105,6 +105,19 @@ class OrderController extends Controller
         }
     }
 
+    public function show(string $id)
+    {
+        try {
+            $order = Order::with(['pelanggan', 'details.product'])->findOrFail($id);
+            return view('order.show', [
+                'title' => 'Order Detail',
+                'data' => $order
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('order.index')->with('error', 'Data pemesanan tidak ditemukan.');
+        }
+    }
+
     public function edit(string $id)
     {
         try {

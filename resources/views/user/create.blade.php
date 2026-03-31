@@ -25,7 +25,7 @@
                         <h6>Add New {{ $title }}</h6>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('user.store') }}" method="POST">
+                        <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
@@ -38,6 +38,28 @@
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
                                 <input type="password" class="form-control" name="password" placeholder="Enter Password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="" selected disabled>Select Role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="courier">Courier</option>
+                                    <option value="owner">Owner</option>
+                                    <option value="customer">Customer</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" name="no_telepon" placeholder="Enter Phone Number" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" name="alamat" rows="3" placeholder="Enter Address" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Photo</label>
+                                <input type="file" class="form-control" name="foto">
                             </div>
                             <div class="text-end mt-4">
                                 <a href="{{ route('user.index') }}" class="btn bg-gradient-secondary me-3">Cancel</a>
