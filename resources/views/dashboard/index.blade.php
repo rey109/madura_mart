@@ -166,7 +166,7 @@
                   <h6>Recent Orders</h6>
                   <p class="text-sm mb-0">
                     <i class="fa fa-check text-info" aria-hidden="true"></i>
-                    <span class="font-weight-bold ms-1">{{ count($recentOrders) }} orders</span> fetched
+                    <span class="font-weight-bold ms-1">{{ count($recentOrders) }} {{ count($recentOrders) == 1 ? 'order' : 'orders' }}</span> fetched
                   </p>
                 </div>
               </div>
@@ -200,7 +200,7 @@
                         <span class="text-xs font-weight-bold"> {{ $order->tgl_pemesanan }} </span>
                       </td>
                       <td class="align-middle text-center">
-                         <span class="text-xs font-weight-bold"> Rp {{ number_format($order->total_harga, 0, ',', '.') }} </span>
+                         <span class="text-xs font-weight-bold"> Rp {{ number_format($order->total_bayar, 0, ',', '.') }} </span>
                       </td>
                       <td class="align-middle">
                         <a href="{{ route('order.show', $order->id) }}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Order">

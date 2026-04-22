@@ -141,7 +141,9 @@
   <script src="{{asset('be/assets/js/plugins/chartjs.min.js')}}"></script>
 
   <script>
-    var ctx = document.getElementById("chart-bars").getContext("2d");
+    var chartBarsEl = document.getElementById("chart-bars");
+    if (chartBarsEl) {
+    var ctx = chartBarsEl.getContext("2d");
 
     new Chart(ctx, {
       type: "bar",
@@ -200,15 +202,24 @@
               drawTicks: false
             },
             ticks: {
-              display: false
+              display: true,
+              color: "#fff",
+              padding: 5,
+              font: {
+                size: 11,
+                family: "Open Sans"
+              }
             },
           },
         },
       },
     });
+    }
 
 
-    var ctx2 = document.getElementById("chart-line").getContext("2d");
+    var chartLineEl = document.getElementById("chart-line");
+    if (chartLineEl) {
+    var ctx2 = chartLineEl.getContext("2d");
 
     var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
 
@@ -309,6 +320,7 @@
         },
       },
     });
+    }
   </script>
   <script>
     var win = navigator.platform.indexOf('Win') > -1;

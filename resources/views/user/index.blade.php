@@ -56,8 +56,8 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex px-2 py-1">
-                                                    <div>
-                                                        <img src="{{ $data->foto && $data->foto != 'default.png' ? asset('images/users/' . $data->foto) : asset('assets/img/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user1">
+                                                    <div class="cursor-pointer" data-bs-toggle="modal" data-bs-target="#userModal{{ $data->id }}">
+                                                        <img src="{{ $data->foto && $data->foto != 'default.png' ? asset('images/users/' . $data->foto) : asset('assets/img/team-2.jpg') }}" class="avatar avatar-sm me-3 border-radius-lg shadow" alt="user1">
                                                     </div>
                                                 </div>
                                             </td>
@@ -86,6 +86,64 @@
                                                 </form>
                                             </td>
                                         </tr>
+
+                                        <!-- User Detail Modal (KTP Style) -->
+                                        <div class="modal fade" id="userModal{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="userModalLabel{{ $data->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                <div class="modal-content border-radius-xl shadow-lg border-0" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h5 class="modal-title font-weight-bolder text-info text-gradient" id="userModalLabel{{ $data->id }}">KARTU TANDA PENGGUNA - MADURA MART</h5>
+                                                        <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body pt-0">
+                                                        <hr class="horizontal dark mt-0 mb-3">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8">
+                                                                <div class="p-3" style="font-family: 'Courier New', Courier, monospace; background: rgba(255, 255, 255, 0.4); border-radius: 15px; border: 1px solid rgba(255,255,255,0.6);">
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">User ID</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder">: {{ str_pad($data->id, 8, '0', STR_PAD_LEFT) }}</div>
+                                                                    </div>
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">Nama</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder">: {{ strtoupper($data->name) }}</div>
+                                                                    </div>
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">Email</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder">: {{ $data->email }}</div>
+                                                                    </div>
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">Alamat</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder">: {{ $data->alamat ?? 'N/A' }}</div>
+                                                                    </div>
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">Telepon</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder">: {{ $data->no_telepon ?? 'N/A' }}</div>
+                                                                    </div>
+                                                                    <div class="row mb-2">
+                                                                        <div class="col-4 text-xs font-weight-bold text-uppercase opacity-7">Role</div>
+                                                                        <div class="col-8 text-sm font-weight-bolder text-info text-gradient">: {{ strtoupper($data->role) }}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4 text-center mt-3 mt-md-0">
+                                                                <div class="position-relative d-inline-block">
+                                                                    <img src="{{ $data->foto && $data->foto != 'default.png' ? asset('images/users/' . $data->foto) : asset('assets/img/team-2.jpg') }}" 
+                                                                         class="img-fluid border-radius-lg shadow-lg" 
+                                                                         style="width: 160px; height: 200px; object-fit: cover; border: 4px solid white;">
+                                                                    <div class="bg-white border-radius-sm p-1 shadow-sm mt-n3 mx-auto" style="width: fit-content; position: relative; z-index: 2;">
+                                                                        <small class="font-weight-bold text-xxs px-2 text-info">OFFICIAL MEMBER</small>
+                                                                    </div>
+                                                                </div>
+                                                                <p class="mt-3 text-xs font-weight-bold opacity-6">BERLAKU SELAMANYA</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                 </tbody>
                             </table>

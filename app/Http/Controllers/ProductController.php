@@ -2,23 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Products;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
+/**
+ * Class ProductController
+ * 
+ * Manages product inventory, including soft deletes and image lifecycle management.
+ * Includes a 'Recycle Bin' feature for product images.
+ * 
+ * @package App\Http\Controllers
+ */
 class ProductController extends Controller
 {
+    /**
+     * Display a listing of active products.
+     */
     public function index()
     {
         return view('product.index', [
             'title' => 'Products',
-            'datas' => Products::paginate(50)
+            'datas' => Product::paginate(50)
         ]);
     }
 
+    /**
+     * Show form for creating a new product.
+     */
     public function create()
     {
         return view('product.create', [
@@ -26,6 +40,9 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Store a newly created product in storage.
+     */
     public function store(Request $request)
     {
         try {
@@ -35,7 +52,7 @@ class ProductController extends Controller
 
             $data = $request->only(['kd_barang', 'nama_barang', 'jenis_barang', 'tgl_expired', 'harga_jual', 'stok']);
             
-            // Handle file upload
+            // Handle file upload: Store in 'public/images/products'
             if ($request->hasFile('foto_barang')) {
                 $file = $request->file('foto_barang');
                 $filename = time() . '_' . $file->getClientOriginalName();
@@ -43,9 +60,10 @@ class ProductController extends Controller
                 $data['foto_barang'] = $path;
             }
             
-            Products::create($data);
+            Product::create($data);
             return redirect()->route('product.index')->with('simpan', 'Produk ' . $request->nama_barang . ' berhasil disimpan');
         } catch (QueryException $e) {
+            // Unique constraint error (e.g., duplicated barcode/kd_barang)
             if ($e->errorInfo[1] == 1062) {
                 return redirect()->back()->withInput()->with('error', 'Gagal: Kode Barang atau Nama Produk sudah ada.');
             }
@@ -60,7 +78,7 @@ class ProductController extends Controller
         try {
             return view('product.edit', [
                 'title' => 'Products',
-                'data' => Products::findOrFail($id)
+                'data' => Product::findOrFail($id)
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->route('product.index')->with('error', 'Produk tidak ditemukan.');
@@ -69,6 +87,10 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Update the specified product in storage.
+     * Moves old images to a recycle bin before replacing them.
+     */
     public function update(Request $request, string $id)
     {
         try {
@@ -77,17 +99,16 @@ class ProductController extends Controller
             ]);
 
             $data = $request->only(['kd_barang', 'nama_barang', 'jenis_barang', 'tgl_expired', 'harga_jual', 'stok']);
-            $product = Products::findOrFail($id);
+            $product = Product::findOrFail($id);
             
-            // Handle file upload if new file is provided
+            // If new file provided, move old one to Recycle Bin
             if ($request->hasFile('foto_barang')) {
-                // Delete old image if exists
-                // Move old image to recycle_bin if exists
                 if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
                     if (!Storage::disk('public')->exists('images/recycle_bin')) {
                          Storage::disk('public')->makeDirectory('images/recycle_bin');
                     }
                     $filename = basename($product->foto_barang);
+                    // Move to trash folder instead of permanent deletion
                     Storage::disk('public')->move($product->foto_barang, 'images/recycle_bin/' . time() . '_' . $filename);
                 }
                 
@@ -111,10 +132,13 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Move product to Trash (Soft Delete).
+     */
     public function destroy(string $id)
     {
         try {
-            $product = Products::findOrFail($id);
+            $product = Product::findOrFail($id);
             $nama = $product->nama_barang;
             
             // For Soft Deletes, we DO NOT move the file yet.
@@ -134,18 +158,24 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Display a listing of soft-deleted products.
+     */
     public function trash()
     {
         return view('product.trash', [
             'title' => 'Product Trash',
-            'datas' => Products::onlyTrashed()->paginate(50)
+            'datas' => Product::onlyTrashed()->paginate(50)
         ]);
     }
 
+    /**
+     * Restore a soft-deleted product.
+     */
     public function restore(string $id)
     {
         try {
-            $product = Products::onlyTrashed()->findOrFail($id);
+            $product = Product::onlyTrashed()->findOrFail($id);
             $product->restore();
             return redirect()->route('product.trash')->with('restore', 'Produk ' . $product->nama_barang . ' berhasil dikembalikan');
         } catch (Throwable $e) {
@@ -153,13 +183,16 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Permanently delete a product and its image.
+     */
     public function forceDelete(string $id)
     {
         try {
-            $product = Products::onlyTrashed()->findOrFail($id);
+            $product = Product::onlyTrashed()->findOrFail($id);
             $nama = $product->nama_barang;
 
-            // Move image to recycle_bin before permanent deletion (Final Backup)
+            // Final Backup: Move image to recycle_bin before permanent deletion
             if ($product->foto_barang && Storage::disk('public')->exists($product->foto_barang)) {
                 if (!Storage::disk('public')->exists('images/recycle_bin')) {
                         Storage::disk('public')->makeDirectory('images/recycle_bin');
@@ -175,3 +208,4 @@ class ProductController extends Controller
         }
     }
 }
+

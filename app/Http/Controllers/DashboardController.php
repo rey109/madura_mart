@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Sale;
 use App\Models\Client;
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class DashboardController
+ * 
+ * Handles the main dashboard view and statistics calculation.
+ * 
+ * @package App\Http\Controllers
+ */
 class DashboardController extends Controller
+
 {
     public function index()
     {

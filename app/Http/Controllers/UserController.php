@@ -10,7 +10,15 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
 
+/**
+ * Class UserController
+ * 
+ * Handles User Management (CRUD) including profile photo uploads and password hashing.
+ * 
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
+
 {
     public function index()
     {
@@ -33,14 +41,17 @@ class UserController extends Controller
             $data = $request->only(['name', 'email', 'role', 'alamat', 'no_telepon']);
             $data['password'] = Hash::make($request->password);
 
+            // Handle Profile Photo Upload
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
                 $filename = time() . '_' . $file->getClientOriginalName();
+                // Store in public/images/users
                 $file->move(public_path('images/users'), $filename);
                 $data['foto'] = $filename;
             } else {
                 $data['foto'] = 'default.png';
             }
+
 
             User::create($data);
             return redirect()->route('user.index')->with('simpan', 'User ' . $request->name . ' berhasil disimpan');
@@ -101,12 +112,17 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Remove the specified user from storage.
+     * Includes cleanup of profile photo and check for related order data.
+     */
     public function destroy(string $id)
     {
         try {
             $user = User::findOrFail($id);
             $nama = $user->name;
 
+            // Delete user photo if it's not the default
             if ($user->foto && $user->foto != 'default.png' && File::exists(public_path('images/users/' . $user->foto))) {
                 File::delete(public_path('images/users/' . $user->foto));
             }
@@ -116,6 +132,7 @@ class UserController extends Controller
         } catch (ModelNotFoundException $e) {
             return redirect()->route('user.index')->with('error', 'User tidak ditemukan atau sudah dihapus.');
         } catch (QueryException $e) {
+             // Handle Foreign Key Constraint (User has Orders)
              if ($e->errorInfo[1] == 1451) {
                  return redirect()->route('user.index')->with('error', 'Gagal: User tidak bisa dihapus karena memiliki data transaksi (Order).');
             }
@@ -124,4 +141,5 @@ class UserController extends Controller
             return redirect()->route('user.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 }

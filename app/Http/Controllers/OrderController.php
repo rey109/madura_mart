@@ -5,14 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Client;
-use App\Models\Products;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
+/**
+ * Class OrderController
+ * 
+ * Handles client orders and reservations.
+ * Manages stock reduction upon ordering and ensures data integrity via DB transactions.
+ */
 class OrderController extends Controller
 {
+    /**
+     * Display a listing of orders.
+     */
     public function index()
     {
         return view('order.index', [
@@ -21,15 +31,21 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * Show form for creating a new order.
+     */
     public function create()
     {
         return view('order.create', [
             'title' => 'Order',
             'clients' => Client::all(),
-            'products' => \App\Models\Products::all()
+            'products' => Product::all()
         ]);
     }
 
+    /**
+     * Store a newly created order.
+     */
     public function store(Request $request)
     {
         try {
@@ -44,67 +60,18 @@ class OrderController extends Controller
                 'quantities.*' => 'numeric|min:1',
             ]);
 
-            \Illuminate\Support\Facades\DB::beginTransaction();
+            $order = Order::storeAsSet($request->all());
 
-            $total_bayar = 0;
-            $details = [];
+            return redirect()->route('order.index')->with('simpan', 'Pemesanan berhasil disimpan. Total: Rp ' . number_format($order->total_bayar));
 
-            foreach ($request->products as $index => $productId) {
-                $qty = $request->quantities[$index];
-                $product = \App\Models\Products::lockForUpdate()->find($productId);
-                
-                if (!$product) {
-                    throw new \Exception("Produk ID $productId tidak ditemukan.");
-                }
-
-                if ($product->stok < $qty) {
-                    throw new \Exception("Stok tidak cukup untuk produk: " . $product->nama_barang . " (Sisa: " . $product->stok . ")");
-                }
-
-                $subtotal = $product->harga_jual * $qty;
-                $total_bayar += $subtotal;
-
-                // Decrease Stock (Reserve for Order)
-                $product->decrement('stok', $qty);
-
-                $details[] = [
-                    'id_barang' => $productId,
-                    'harga_jual' => $product->harga_jual,
-                    'jumlah_jual' => $qty,
-                    'subtotal' => $subtotal,
-                    'catatan' => $request->item_notes[$index] ?? null
-                ];
-            }
-
-            $order = Order::create([
-                'tgl_pemesanan' => $request->tgl_pemesanan,
-                'id_pelanggan' => $request->id_pelanggan,
-                'status_pemesanan' => $request->status_pemesanan,
-                'metode_pembayaran' => $request->metode_pembayaran,
-                'total_bayar' => $total_bayar,
-                'status_catatan' => $request->status_catatan
-            ]);
-
-            foreach ($details as $detail) {
-                $order->details()->create($detail);
-            }
-
-            \Illuminate\Support\Facades\DB::commit();
-
-            return redirect()->route('order.index')->with('simpan', 'Pemesanan berhasil disimpan. Total: Rp ' . number_format($total_bayar));
-
-        } catch (QueryException $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan pemesanan: ' . $e->getMessage());
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         } catch (Throwable $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Display order details.
+     */
     public function show(string $id)
     {
         try {
@@ -118,6 +85,9 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Show form for editing order.
+     */
     public function edit(string $id)
     {
         try {
@@ -125,15 +95,16 @@ class OrderController extends Controller
                 'title' => 'Order',
                 'data' => Order::with('details.product')->findOrFail($id),
                 'clients' => Client::all(),
-                'products' => \App\Models\Products::all()
+                'products' => Product::all()
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->route('order.index')->with('error', 'Data pemesanan tidak ditemukan.');
-        } catch (Throwable $e) {
-            return redirect()->route('order.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Update order metadata.
+     */
     public function update(Request $request, string $id)
     {
         try {
@@ -145,29 +116,26 @@ class OrderController extends Controller
                 'total_bayar' => 'required|numeric'
             ]);
             
-            $data = $request->only(['tgl_pemesanan', 'id_pelanggan', 'status_pemesanan', 'metode_pembayaran', 'total_bayar', 'keterangan_status']);
             $order = Order::findOrFail($id);
-            $order->update($data);
-            return redirect()->route('order.index')->with('ubah', 'Data pemesanan berhasil diupdate (Detail item tidak berubah).');
-        } catch (QueryException $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal mengupdate pemesanan: ' . $e->getMessage());
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('order.index')->with('error', 'Data pemesanan tidak ditemukan.');
+            $order->update($request->only(['tgl_pemesanan', 'id_pelanggan', 'status_pemesanan', 'metode_pembayaran', 'total_bayar', 'keterangan_status']));
+            
+            return redirect()->route('order.index')->with('ubah', 'Data pemesanan berhasil diupdate.');
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Delete order and restore stock.
+     */
     public function destroy(string $id)
     {
         try {
-            \Illuminate\Support\Facades\DB::beginTransaction();
-            
+            DB::beginTransaction();
             $order = Order::with('details')->findOrFail($id);
             
-            // Restore Stock
             foreach ($order->details as $detail) {
-                $product = \App\Models\Products::find($detail->id_barang);
+                $product = Product::find($detail->id_barang);
                 if ($product) {
                     $product->increment('stok', $detail->jumlah_jual);
                 }
@@ -176,17 +144,11 @@ class OrderController extends Controller
             $order->details()->delete();
             $order->delete();
             
-            \Illuminate\Support\Facades\DB::commit();
-            return redirect()->route('order.index')->with('hapus', 'Pemesanan berhasil dihapus & stok dikembalikan.');
-        } catch (ModelNotFoundException $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->route('order.index')->with('error', 'Data pemesanan tidak ditemukan atau sudah dihapus.');
-        } catch (QueryException $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->route('order.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            DB::commit();
+            return redirect()->route('order.index')->with('hapus', 'Pemesanan berhasil dihapus.');
         } catch (Throwable $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->route('order.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            DB::rollBack();
+            return redirect()->route('order.index')->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 }

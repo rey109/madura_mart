@@ -149,15 +149,5 @@
         </div>
     </div>
 
-    <script>
-        @if (session('simpan'))
-            swal("Success", "{{ session('simpan') }}", "success");
-        @endif
-        @if (session('ubah'))
-            swal("Success", "{{ session('ubah') }}", "success");
-        @endif
-        @if (session('hapus'))
-            swal("Deleted", "{{ session('hapus') }}", "success");
-        @endif
-    </script>
 @endsection
+

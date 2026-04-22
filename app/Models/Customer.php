@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Client
+ * Class Customer
  * 
- * Represents a customer or client profile.
+ * Represents an external client or customer.
  * 
  * @package App\Models
  * @property int $id
@@ -15,17 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $alamat_pelanggan
  * @property string $notelepon_pelanggan
  */
-class Client extends Model
-
+class Customer extends Model
 {
     protected $fillable = ['nama_pelanggan', 'alamat_pelanggan', 'notelepon_pelanggan'];
-
-    /**
-     * Get the orders placed by this client.
-     */
-    public function orders()
-    {
-        return $this->hasMany(Order::class, 'id_pelanggan');
-    }
 }
+
 

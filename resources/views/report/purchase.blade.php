@@ -18,7 +18,10 @@
                   <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nota No</th>
                   <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Date</th>
                   <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Distributor</th>
-                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Product</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Qty</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Buy Price</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
@@ -27,11 +30,15 @@
                   <td class="ps-4"><p class="text-xs font-weight-bold mb-0">{{$nmr + 1}}</p></td>
                   <td><p class="text-xs font-weight-bold mb-0">{{$data->no_nota}}</p></td>
                   <td><p class="text-xs font-weight-bold mb-0">{{$data->tgl_nota}}</p></td>
-                  <td><p class="text-xs font-weight-bold mb-0">{{$data->distributor->nama_distributor ?? '-'}}</p></td>
-                  <td><p class="text-xs font-weight-bold mb-0">Rp {{number_format($data->total_bayar)}}</p></td>
+                  <td><p class="text-xs font-weight-bold mb-0">{{$data->nama_distributor}}</p></td>
+                  <td><p class="text-xs font-weight-bold mb-0">{{$data->nama_barang}}</p></td>
+                  <td><p class="text-xs font-weight-bold mb-0">{{$data->jumlah_beli}}</p></td>
+                  <td><p class="text-xs font-weight-bold mb-0">Rp {{number_format($data->harga_beli)}}</p></td>
+                  <td><p class="text-xs font-weight-bold mb-0">Rp {{number_format($data->subtotal)}}</p></td>
                 </tr>
                 @endforeach
               </tbody>
+
             </table>
           </div>
         </div>
