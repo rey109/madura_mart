@@ -26,7 +26,7 @@ class Purchase extends Model
 
     public function getAutoNumberPrefix(): string
     {
-        return 'PURCH';
+        return 'NTB';
     }
 
     /**

@@ -26,7 +26,7 @@ trait HasAutoNumber
      */
     public static function generateAutoNumber($prefix)
     {
-        $date = Carbon::now()->format('Ymd');
+        $date = Carbon::now()->format('ymd');
         $searchPrefix = $prefix . '-' . $date . '-';
         
         $lastRecord = static::where(static::getAutoNumberFieldStatic(), 'LIKE', $searchPrefix . '%')

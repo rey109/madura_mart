@@ -197,16 +197,31 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="action-btn" title="Edit" onclick="requirePasswordForEdit('{{ route('purchase.edit', $purchase->id) }}')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <form id="delete-form-{{ $purchase->id }}" action="{{ route('purchase.destroy', $purchase->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="action-btn" title="Delete" onclick="requirePasswordForDelete('delete-form-{{ $purchase->id }}')">
-                                                <i class="fas fa-trash-alt"></i>
+                                        @if(auth()->user()->role === 'owner')
+                                            {{-- Owner: langsung edit tanpa password --}}
+                                            <a href="{{ route('purchase.edit', $purchase->id) }}" class="action-btn" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form id="delete-form-{{ $purchase->id }}" action="{{ route('purchase.destroy', $purchase->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="action-btn" title="Delete" onclick="confirmDelete('delete-form-{{ $purchase->id }}')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            {{-- Admin/Staf: butuh password atasan --}}
+                                            <button type="button" class="action-btn" title="Edit" onclick="requirePasswordForEdit('{{ route('purchase.edit', $purchase->id) }}')">
+                                                <i class="fas fa-edit"></i>
                                             </button>
-                                        </form>
+                                            <form id="delete-form-{{ $purchase->id }}" action="{{ route('purchase.destroy', $purchase->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="action-btn" title="Delete" onclick="requirePasswordForDelete('delete-form-{{ $purchase->id }}')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -308,6 +323,24 @@
                 } else {
                     swal.showInputError("Password salah!");
                     return false;
+                }
+            });
+        }
+
+        // Untuk Owner: langsung konfirmasi hapus tanpa password
+        function confirmDelete(formId) {
+            swal({
+                title: "Are you sure want to delete?",
+                text: "Your will not be able to recover this data!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ea0606",
+                confirmButtonText: "YES, DELETE IT!",
+                cancelButtonText: "CANCEL",
+                closeOnConfirm: false
+            }, function(isConfirm) {
+                if (isConfirm) {
+                    document.getElementById(formId).submit();
                 }
             });
         }

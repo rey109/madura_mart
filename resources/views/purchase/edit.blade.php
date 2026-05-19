@@ -5,57 +5,123 @@
 @endsection
 
 @section('purchase')
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
-        <div class="container-fluid py-1 px-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ $title }}</li>
-                </ol>
-                <h6 class="font-weight-bolder mb-0">{{ $title }}</h6>
-            </nav>
-        </div>
-    </nav>
+    <style>
+        .pos-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: white;
+            padding: 30px;
+        }
+        .form-label {
+            color: #344767;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .form-control, .form-select {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        .form-control:focus {
+            border-color: #cb0c9f;
+            box-shadow: 0 0 0 0.2rem rgba(203, 12, 159, 0.25);
+        }
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            opacity: 1;
+        }
+        .btn-cancel {
+            background-color: #8392ab;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 25px;
+            font-weight: 600;
+            border: none;
+        }
+        .btn-cancel:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-update {
+            background-color: #cb0c9f;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 25px;
+            font-weight: 600;
+            border: none;
+        }
+        .btn-update:hover {
+            background-color: #b10a8b;
+            color: white;
+        }
+    </style>
 
     <div class="container-fluid py-4">
         <div class="row justify-content-center">
             <div class="col-12 col-xl-10">
-                <div class="card mb-4">
-                    <div class="card-header pb-0">
-                        <h6>Edit {{ $title }}</h6>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('purchase.update', $data->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">No Nota</label>
-                                    <input type="text" class="form-control" name="no_nota" value="{{ $data->no_nota }}" required>
+                <div class="pos-card mb-4">
+                    <h5 class="mb-4" style="color: #344767; font-weight: 600;">Edit Purchases Data</h5>
+                    
+                    <form action="{{ route('purchase.update', $data->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        @php
+                            // Ambil detail pertama sebagai representasi di form
+                            $detail = $data->details->first();
+                        @endphp
+
+                        <div class="row">
+                            <!-- Kolom Kiri -->
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label">Invoice No</label>
+                                    <input type="text" class="form-control" name="no_nota" value="{{ $data->no_nota }}" readonly>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tanggal Nota</label>
+                                <div class="form-group mt-3">
+                                    <label class="form-label">Invoice Date</label>
                                     <input type="date" class="form-control" name="tgl_nota" value="{{ $data->tgl_nota }}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="form-group mt-3">
                                     <label class="form-label">Distributor</label>
-                                    <select class="form-control" name="id_distributor" required>
-                                        @foreach($distributors as $d)
-                                            <option value="{{ $d->id }}" @if($data->id_distributor == $d->id) selected @endif>{{ $d->nama_distributor }}</option>
-                                        @endforeach
-                                    </select>
+                                    <input type="text" class="form-control" name="distributor_name" value="{{ $data->distributor->nama_distributor ?? '' }}" readonly>
+                                    <input type="hidden" name="id_distributor" value="{{ $data->id_distributor }}">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Total Bayar</label>
-                                    <input type="number" class="form-control" name="total_bayar" value="{{ $data->total_bayar }}" required>
+                                <div class="form-group mt-3">
+                                    <label class="form-label">Book</label>
+                                    <input type="text" class="form-control" name="book_name" value="{{ $detail->product->nama_barang ?? '' }}" readonly>
                                 </div>
                             </div>
-                            <div class="text-end mt-4">
-                                <a href="{{ route('purchase.index') }}" class="btn bg-gradient-secondary me-3">Cancel</a>
-                                <button type="submit" class="btn bg-gradient-primary">Update</button>
+
+                            <!-- Kolom Kanan -->
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label">Purchase Price</label>
+                                    <input type="number" class="form-control" id="purchase_price" value="{{ $detail->harga_beli ?? 0 }}" readonly>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="quantity" value="{{ $detail->jumlah_beli ?? 0 }}" readonly>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label class="form-label">SubTotal</label>
+                                    <input type="number" class="form-control" id="subtotal" value="{{ $detail->subtotal ?? 0 }}" readonly>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label class="form-label">Total Payment</label>
+                                    <input type="text" class="form-control bg-light" name="total_bayar" value="{{ $data->total_bayar }}" readonly style="background-color: #e9ecef !important; font-size: 16px; font-weight: bold; color: #333;">
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <a href="{{ route('purchase.index') }}" class="btn btn-cancel me-2">CANCEL</a>
+                            <button type="submit" class="btn btn-update">EDIT THIS PURCHASE</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
