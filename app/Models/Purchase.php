@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HasAutoNumber;
 
 /**
  * Class Purchase
@@ -14,7 +15,19 @@ use Illuminate\Support\Facades\DB;
  */
 class Purchase extends Model
 {
+    use HasAutoNumber;
+
     protected $fillable = ['no_nota', 'tgl_nota', 'id_distributor', 'total_bayar'];
+
+    public function getAutoNumberField(): string
+    {
+        return 'no_nota';
+    }
+
+    public function getAutoNumberPrefix(): string
+    {
+        return 'PURCH';
+    }
 
     /**
      * Store a complete purchase set (Header + Details) and update stock.
@@ -30,7 +43,7 @@ class Purchase extends Model
             // Create purchase header with total_bayar = 0
             // (Trigger will recalculate total_bayar after details are inserted)
             $purchase = self::create([
-                'no_nota' => $data['no_nota'],
+                'no_nota' => $data['no_nota'] ?? null,
                 'tgl_nota' => $data['tgl_nota'],
                 'id_distributor' => $data['id_distributor'],
                 'total_bayar' => 0

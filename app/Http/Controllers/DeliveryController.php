@@ -33,8 +33,11 @@ class DeliveryController extends Controller
     {
         try {
             $data = $request->only(['tgl_kirim', 'id_kurir', 'id_pemesanan', 'bukti_foto', 'no_invoice']);
-            Delivery::create($data);
-            return redirect()->route('delivery.index')->with('simpan', 'Pengiriman dengan invoice ' . $request->no_invoice . ' berhasil disimpan');
+            if (($data['no_invoice'] ?? '') === '[Auto Generated]') {
+                unset($data['no_invoice']);
+            }
+            $delivery = Delivery::create($data);
+            return redirect()->route('delivery.index')->with('simpan', 'Pengiriman dengan invoice ' . $delivery->no_invoice . ' berhasil disimpan');
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
                 return redirect()->back()->withInput()->with('error', 'Gagal: No Invoice sudah ada.');

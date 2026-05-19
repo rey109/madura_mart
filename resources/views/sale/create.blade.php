@@ -5,184 +5,525 @@
 @endsection
 
 @section('sale')
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
-        <div class="container-fluid py-1 px-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ $title }}</li>
-                </ol>
-                <h6 class="font-weight-bolder mb-0">{{ $title }}</h6>
-            </nav>
-        </div>
-    </nav>
+    <style>
+        .pos-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            background: white;
+        }
+        .item-row:hover {
+            background-color: #f8f9fa;
+        }
+        .qty-input {
+            width: 70px !important;
+            text-align: center;
+            border-radius: 8px !important;
+        }
+        .search-results {
+            position: absolute;
+            width: 100%;
+            z-index: 1000;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .search-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .search-item:last-child {
+            border-bottom: none;
+        }
+        .search-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 25px;
+        }
+        .sidebar-sticky {
+            position: sticky;
+            top: 20px;
+        }
+        .promo-badge {
+            transition: all 0.3s;
+            cursor: pointer;
+            border-radius: 8px !important;
+        }
+        .promo-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn-qty {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px !important;
+        }
+        .cart-empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .cart-empty-state i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+    </style>
+
+    @push('scripts')
+        <script src="https://unpkg.com/html5-qrcode"></script>
+    @endpush
 
     <div class="container-fluid py-4">
-        @if(session('error'))
-        <div class="alert alert-danger text-white" role="alert">
-            {{ session('error') }}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="font-weight-bolder mb-0">Madura Mart POS</h4>
+                <p class="text-sm mb-0">Efficient Sales & Inventory Management</p>
+            </div>
+            <a href="{{ route('sale.index') }}" class="btn bg-gradient-info btn-sm mb-0 shadow-sm">
+                <i class="fas fa-history me-2"></i> TRANSACTION HISTORY
+            </a>
         </div>
-        @endif
-        
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-12">
-                <div class="card mb-4">
-                    <div class="card-header pb-0">
-                        <h6>New Sale Transaction</h6>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('sale.store') }}" method="POST">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Receipt Number (No Struk)</label>
-                                    <input type="text" class="form-control" name="no_struk" placeholder="Enter Receipt Number" required>
+
+        <form action="{{ route('sale.store') }}" method="POST" id="saleForm">
+            @csrf
+            <div class="row">
+                <!-- Left Column: Product Search & Cart -->
+                <div class="col-lg-8">
+                    <div class="card pos-card mb-4">
+                        <div class="card-body p-4">
+                            <!-- Global Product Search -->
+                            <div class="position-relative mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-control-label text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Search Product</label>
+                                    <button type="button" class="btn btn-link text-primary text-xs p-0 mb-1" onclick="startScanner()">
+                                        <i class="fas fa-camera me-1"></i> Scan Barcode
+                                    </button>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Date (Tanggal Jual)</label>
-                                    <input type="date" class="form-control" name="tgl_jual" value="{{ date('Y-m-d') }}" required>
+                                <div class="input-group input-group-lg border-radius-lg border">
+                                    <span class="input-group-text bg-transparent border-0"><i class="fas fa-search text-primary"></i></span>
+                                    <input type="text" class="form-control bg-transparent border-0 ps-0" id="globalSearch" placeholder="Type product name or scan barcode..." autocomplete="off">
                                 </div>
+                                <div id="searchResults" class="search-results">
+                                    <!-- Search results will appear here -->
+                                </div>
+
+                                <!-- Scanner Area (Hidden by default) -->
+                                <div id="reader" style="display: none; border-radius: 12px; overflow: hidden; margin-top: 15px; border: 1px solid #eee;"></div>
                             </div>
-                            
-                            <hr class="horizontal dark my-3">
-                            <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-3">Items list</h6>
-                            
-                            <div class="table-responsive">
-                                <table class="table align-items-center mb-0" id="itemsTable">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-0">Shopping Cart</h6>
+                                <span class="badge bg-light text-dark border-radius-sm" id="itemCount">0 Items</span>
+                            </div>
+
+                            <div class="table-responsive" style="min-height: 300px;">
+                                <table class="table align-items-center mb-0">
                                     <thead>
                                         <tr>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Product</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Stock</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Quantity</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Subtotal</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Price</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">Qty</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-end">Subtotal</th>
                                             <th class="text-secondary opacity-7"></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="itemsBody">
-                                        <!-- Rows added by JS -->
+                                    <tbody id="cartBody">
+                                        <!-- Cart items added here -->
                                     </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="4" class="text-end font-weight-bold">Grand Total</td>
-                                            <td class="font-weight-bold" id="grandTotal">Rp 0</td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
                                 </table>
+                                <div id="emptyCart" class="cart-empty-state">
+                                    <i class="fas fa-shopping-basket"></i>
+                                    <h5>Your cart is empty</h5>
+                                    <p class="text-secondary text-sm">Find products using the search bar above to start a transaction.</p>
+                                </div>
                             </div>
-                            
-                            <div class="d-flex justify-content-end mt-3 mb-3">
-                                <button type="button" class="btn btn-sm btn-info mb-0" onclick="addItem()">+ Add Item</button>
-                            </div>
+                        </div>
+                    </div>
 
-                            <div class="text-end mt-4">
-                                <a href="{{ route('sale.index') }}" class="btn bg-gradient-secondary me-3">Cancel</a>
-                                <button type="submit" class="btn bg-gradient-primary">Process Sale</button>
+                    <div class="card pos-card">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase text-body text-xs font-weight-bolder mb-3">Available Promotions</h6>
+                            <div id="applicableDiscounts" class="d-flex flex-wrap gap-2">
+                                <p class="text-muted text-xs ms-2">Add items to see applicable discounts.</p>
                             </div>
-                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Summary & Receipt Info -->
+                <div class="col-lg-4">
+                    <div class="sidebar-sticky">
+                        <div class="card pos-card mb-4 border-start border-primary border-5">
+                            <div class="card-header pb-0 bg-transparent">
+                                <h6 class="mb-0">Invoice Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label class="form-control-label text-xs">Receipt Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-hashtag text-xs"></i></span>
+                                        <input type="text" class="form-control bg-light" name="no_struk" value="[Auto Generated]" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label class="form-control-label text-xs">Transaction Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar text-xs"></i></span>
+                                        <input type="date" class="form-control" name="tgl_jual" value="{{ date('Y-m-d') }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card pos-card bg-gradient-dark text-white overflow-hidden shadow-lg">
+                            <div class="card-body p-4 position-relative">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-sm opacity-8">Subtotal</span>
+                                    <span class="text-sm font-weight-bold" id="labelSubtotal">Rp 0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-4">
+                                    <span class="text-sm opacity-8">Discount</span>
+                                    <span class="text-sm font-weight-bold text-success" id="labelDiscount">- Rp 0</span>
+                                    <input type="hidden" name="id_diskon" id="inputDiscountId">
+                                    <input type="hidden" name="total_diskon" id="inputTotalDiscount" value="0">
+                                </div>
+                                <hr class="horizontal light my-3">
+                                <div class="d-flex justify-content-between mb-4">
+                                    <h4 class="text-white mb-0">Grand Total</h4>
+                                    <h4 class="text-white font-weight-bolder mb-0" id="grandTotal">Rp 0</h4>
+                                </div>
+                                <button type="submit" class="btn btn-white w-100 btn-lg mb-0 text-dark font-weight-bold shadow-sm" style="border-radius: 12px; font-size: 1rem;">
+                                    FINALIZE SALE <i class="fas fa-check-circle ms-2"></i>
+                                </button>
+                                <p class="text-center text-xs opacity-6 mt-3 mb-0">Ensure all items are correct before processing.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <script>
-        // Available products data from controller
         const products = @json($products);
-        
+        const allDiscounts = @json($discounts);
+        let cart = [];
+        let appliedDiscount = null;
+
         function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
         }
-        
-        function addItem() {
-            const tableBody = document.getElementById('itemsBody');
-            const rowCount = tableBody.rows.length;
-            const row = tableBody.insertRow(rowCount);
-            
-            // Product Select
-            let productOptions = '<option value="">Select Product</option>';
-            products.forEach(p => {
-                productOptions += `<option value="${p.id}" data-price="${p.harga_jual}" data-stock="${p.stok}">${p.nama_barang}</option>`;
-            });
-            
-            row.innerHTML = `
-                <td>
-                    <select class="form-control form-control-sm product-select" name="products[]" required onchange="updateRow(this)">
-                        ${productOptions}
-                    </select>
-                </td>
-                <td><span class="text-sm stock-label">-</span></td>
-                <td>
-                    <input type="text" class="form-control form-control-sm price-input" readonly>
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm qty-input" name="quantities[]" min="1" value="1" required onchange="calculateSubtotal(this)" onkeyup="calculateSubtotal(this)">
-                </td>
-                <td class="subtotal-label text-sm font-weight-bold">Rp 0</td>
-                <td>
-                    <button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeItem(this)">
-                        <i class="far fa-trash-alt me-2"></i>Delete
-                    </button>
-                </td>
-            `;
-        }
-        
-        function updateRow(selectElement) {
-            const row = selectElement.closest('tr');
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
-            const stock = selectedOption.getAttribute('data-stock');
-            
-            row.querySelector('.price-input').value = price;
-            // Format price for display could be handled if needed, for now raw value
-            
-            row.querySelector('.stock-label').textContent = stock || '-';
-            
-            calculateSubtotal(selectElement);
-        }
-        
-        function calculateSubtotal(element) {
-            const row = element.closest('tr');
-            const price = parseFloat(row.querySelector('.price-input').value) || 0;
-            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-            const stock = parseFloat(row.querySelector('.stock-label').textContent) || 0;
-            const stockLabel = row.querySelector('.stock-label');
-            
-            // Stock Validation Highlight
-            if (qty > stock && stock !== '-') {
-                 stockLabel.classList.add('text-danger');
-                 stockLabel.innerHTML = `${stock} (Insufficient!)`;
-            } else if (stock !== '-') {
-                 stockLabel.classList.remove('text-danger');
-                 stockLabel.textContent = stock;
+
+        // Global Search Logic
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            if (query.length < 1) {
+                searchResults.style.display = 'none';
+                return;
             }
 
-            const subtotal = price * qty;
-            row.querySelector('.subtotal-label').textContent = formatRupiah(subtotal);
-            
-            updateGrandTotal();
-        }
-        
-        function updateGrandTotal() {
-            let total = 0;
-            document.querySelectorAll('tbody tr').forEach(row => {
-                const price = parseFloat(row.querySelector('.price-input').value) || 0;
-                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-                total += price * qty;
-            });
-            document.getElementById('grandTotal').textContent = formatRupiah(total);
-        }
-        
-        function removeItem(button) {
-            const row = button.closest('tr');
-            row.remove();
-            updateGrandTotal();
-        }
-        
-        // Add one initial row
-        document.addEventListener('DOMContentLoaded', () => {
-             addItem();
+            const filtered = products.filter(p => 
+                p.nama_barang.toLowerCase().includes(query) || 
+                p.kd_barang.toLowerCase().includes(query)
+            );
+
+            if (filtered.length > 0) {
+                let html = '';
+                filtered.forEach(p => {
+                    html += `
+                        <div class="search-item d-flex justify-content-between align-items-center" onclick="addToCart(${p.id})">
+                            <div class="d-flex align-items-center">
+                                <div class="icon icon-shape icon-sm shadow border-radius-md bg-gradient-primary text-center me-3 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-box text-xs opacity-10"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-sm">${p.nama_barang}</h6>
+                                    <small class="text-xs text-muted">${p.kd_barang} | Stock: ${p.stok}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-0 text-sm">${formatRupiah(p.harga_jual)}</h6>
+                                <span class="badge bg-light text-primary text-xxs">Add Item <i class="fas fa-plus"></i></span>
+                            </div>
+                        </div>
+                    `;
+                });
+                searchResults.innerHTML = html;
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="p-4 text-center text-xs text-muted"><i class="fas fa-search mb-2 d-block" style="font-size: 2rem; opacity: 0.2;"></i> No products found matching your search.</div>';
+                searchResults.style.display = 'block';
+            }
         });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id == productId);
+            const existing = cart.find(item => item.id == productId);
+
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.nama_barang,
+                    price: product.harga_jual,
+                    stock: product.stok,
+                    qty: 1
+                });
+            }
+
+            searchInput.value = '';
+            searchResults.style.display = 'none';
+            renderCart();
+        }
+
+        function renderCart() {
+            const body = document.getElementById('cartBody');
+            const empty = document.getElementById('emptyCart');
+            const countLabel = document.getElementById('itemCount');
+            
+            if (cart.length === 0) {
+                body.innerHTML = '';
+                empty.style.display = 'block';
+                countLabel.textContent = '0 Items';
+                updateTotals();
+                return;
+            }
+
+            empty.style.display = 'none';
+            countLabel.textContent = `${cart.length} Items`;
+            
+            let html = '';
+            cart.forEach((item, index) => {
+                const subtotal = item.price * item.qty;
+                html += `
+                    <tr class="item-row">
+                        <td>
+                            <div class="d-flex px-2 py-2">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm">${item.name}</h6>
+                                    <p class="text-xs text-secondary mb-0">Available Stock: ${item.stock}</p>
+                                    <input type="hidden" name="products[]" value="${item.id}">
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle text-center">
+                            <span class="text-sm font-weight-bold">${formatRupiah(item.price)}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <button type="button" class="btn btn-qty btn-outline-secondary mb-0" onclick="updateQty(${item.id}, -1)">
+                                    <i class="fas fa-minus text-xxs"></i>
+                                </button>
+                                <input type="number" name="quantities[]" class="form-control form-control-sm qty-input mx-2" value="${item.qty}" min="1" onchange="setQty(${item.id}, this.value)">
+                                <button type="button" class="btn btn-qty btn-outline-secondary mb-0" onclick="updateQty(${item.id}, 1)">
+                                    <i class="fas fa-plus text-xxs"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="align-middle text-end">
+                            <span class="text-sm font-weight-bold">${formatRupiah(subtotal)}</span>
+                        </td>
+                        <td class="align-middle">
+                            <button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeFromCart(${item.id})">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            body.innerHTML = html;
+            updateTotals();
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id == id);
+            if (item) {
+                item.qty = Math.max(1, item.qty + delta);
+                renderCart();
+            }
+        }
+
+        function setQty(id, val) {
+            const item = cart.find(i => i.id == id);
+            if (item) {
+                item.qty = Math.max(1, parseInt(val) || 1);
+                renderCart();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id != id);
+            renderCart();
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+            const itemsForDiscount = [];
+            cart.forEach(item => {
+                subtotal += item.price * item.qty;
+                itemsForDiscount.push({ id: item.id, qty: item.qty });
+            });
+
+            document.getElementById('labelSubtotal').textContent = formatRupiah(subtotal);
+            
+            // Promo check
+            updateApplicableDiscounts(subtotal, itemsForDiscount);
+            
+            let discountValue = 0;
+            if (appliedDiscount) {
+                if (appliedDiscount.tipe_diskon === 'percentage') {
+                    discountValue = (subtotal * appliedDiscount.nilai_diskon) / 100;
+                    if (appliedDiscount.max_diskon && discountValue > appliedDiscount.max_diskon) {
+                        discountValue = appliedDiscount.max_diskon;
+                    }
+                } else {
+                    discountValue = parseFloat(appliedDiscount.nilai_diskon);
+                }
+                if (discountValue > subtotal) discountValue = subtotal;
+            }
+
+            document.getElementById('labelDiscount').textContent = '- ' + formatRupiah(discountValue);
+            document.getElementById('inputTotalDiscount').value = discountValue;
+            document.getElementById('grandTotal').textContent = formatRupiah(subtotal - discountValue);
+        }
+
+        function updateApplicableDiscounts(subtotal, items) {
+            const container = document.getElementById('applicableDiscounts');
+            const applicable = allDiscounts.filter(d => {
+                if (subtotal < d.min_transaksi) return false;
+                if (d.id_barang) {
+                    const item = items.find(i => i.id == d.id_barang);
+                    if (!item || item.qty < d.min_qty) return false;
+                }
+                return true;
+            });
+
+            if (applicable.length === 0) {
+                container.innerHTML = '<p class="text-muted text-xs ms-2">Add more items to unlock discounts.</p>';
+                appliedDiscount = null;
+                document.getElementById('inputDiscountId').value = '';
+                return;
+            }
+
+            let html = '';
+            applicable.forEach(d => {
+                const isActive = appliedDiscount && appliedDiscount.id === d.id;
+                const color = isActive ? 'bg-gradient-success' : 'bg-gradient-primary';
+                const text = d.tipe_diskon === 'percentage' ? `${d.nilai_diskon}%` : formatRupiah(d.nilai_diskon);
+                
+                html += `
+                    <div class="badge promo-badge ${color} border-0 p-2 mb-2" onclick="applyDiscount(${d.id})">
+                        <i class="fas fa-tag me-1"></i> ${d.nama_diskon} (${text})
+                        ${isActive ? '<i class="fas fa-check ms-1"></i>' : ''}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function applyDiscount(id) {
+            if (appliedDiscount && appliedDiscount.id === id) {
+                appliedDiscount = null;
+                document.getElementById('inputDiscountId').value = '';
+            } else {
+                appliedDiscount = allDiscounts.find(d => d.id === id);
+                document.getElementById('inputDiscountId').value = id;
+            }
+            updateTotals();
+        }
+
+        // BARCODE SCANNER LOGIC
+        let html5QrCode = null;
+
+        function startScanner() {
+            const readerDiv = document.getElementById('reader');
+            
+            if (html5QrCode) {
+                // If already running, stop it
+                html5QrCode.stop().then(() => {
+                    readerDiv.style.display = 'none';
+                    html5QrCode = null;
+                }).catch((err) => {
+                    console.error("Error stopping scanner", err);
+                });
+                return;
+            }
+
+            readerDiv.style.display = 'block';
+            html5QrCode = new Html5Qrcode("reader");
+            
+            const config = { 
+                fps: 20, 
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    return { width: viewfinderWidth * 0.8, height: viewfinderHeight * 0.4 };
+                },
+                aspectRatio: 1.0,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
+
+            // Enhanced camera constraints for better focus
+            const cameraConfig = { 
+                facingMode: "environment",
+                focusMode: "continuous",
+                advanced: [{ zoom: 2.0 }] // Try to zoom a bit for small barcodes
+            };
+
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => {
+                    console.error("Error starting scanner", err);
+                    alert("Gagal mengakses kamera. Pastikan izin kamera telah diberikan.");
+                    readerDiv.style.display = 'none';
+                    html5QrCode = null;
+                });
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Find product by kd_barang
+            const product = products.find(p => p.kd_barang === decodedText);
+            
+            if (product) {
+                // Play a success sound if you want, or just feedback
+                addToCart(product.id);
+                
+                // Show temporary toast or feedback
+                const searchInput = document.getElementById('globalSearch');
+                const originalPlaceholder = searchInput.placeholder;
+                searchInput.placeholder = "Added: " + product.nama_barang;
+                searchInput.classList.add('border-success');
+                
+                setTimeout(() => {
+                    searchInput.placeholder = originalPlaceholder;
+                    searchInput.classList.remove('border-success');
+                }, 2000);
+
+                // Stop scanner after success to save resources, or keep it running for multiple items
+                // html5QrCode.stop(); 
+                // readerDiv.style.display = 'none';
+            } else {
+                console.warn("Product with barcode " + decodedText + " not found.");
+            }
+        }
     </script>
 @endsection

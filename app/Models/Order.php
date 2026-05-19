@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HasAutoNumber;
 
 /**
  * Class Order
@@ -14,7 +15,19 @@ use Illuminate\Support\Facades\DB;
  */
 class Order extends Model
 {
-    protected $fillable = ['tgl_pemesanan', 'id_pelanggan', 'status_pemesanan', 'metode_pembayaran', 'total_bayar', 'keterangan_status'];
+    use HasAutoNumber;
+
+    protected $fillable = ['no_order', 'tgl_pemesanan', 'id_pelanggan', 'status_pemesanan', 'metode_pembayaran', 'total_bayar', 'keterangan_status'];
+
+    public function getAutoNumberField(): string
+    {
+        return 'no_order';
+    }
+
+    public function getAutoNumberPrefix(): string
+    {
+        return 'ORD';
+    }
 
     /**
      * Store a complete order set (Header + Details) and reserve stock.
@@ -54,6 +67,7 @@ class Order extends Model
             }
 
             $order = self::create([
+                'no_order' => $data['no_order'] ?? null,
                 'tgl_pemesanan' => $data['tgl_pemesanan'],
                 'id_pelanggan' => $data['id_pelanggan'],
                 'status_pemesanan' => $data['status_pemesanan'],

@@ -29,8 +29,14 @@
                             @csrf
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Kode Barang</label>
-                                    <input type="text" class="form-control" name="kd_barang" placeholder="Enter Product Code" required>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label mb-0">Kode Barang</label>
+                                        <button type="button" class="btn btn-link text-primary text-xs p-0 mb-0" onclick="startScanner()">
+                                            <i class="fas fa-camera me-1"></i> Scan
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control" name="kd_barang" id="kd_barang" placeholder="Enter Product Code" required>
+                                    <div id="reader" style="display: none; border-radius: 8px; overflow: hidden; margin-top: 10px; border: 1px solid #eee;"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nama Barang</label>
@@ -66,21 +72,59 @@
                                 <button type="submit" class="btn bg-gradient-primary">Save</button>
                             </div>
                         </form>
-                        <script>
-                            document.getElementById('foto_barang').addEventListener('change', function(e) {
-                                const preview = document.getElementById('preview_image');
-                                const file = e.target.files[0];
-                                if (file) {
-                                    preview.src = URL.createObjectURL(file);
-                                    preview.style.display = 'block';
-                                } else {
-                                    preview.style.display = 'none';
-                                }
-                            });
-                        </script>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        document.getElementById('foto_barang').addEventListener('change', function(e) {
+            const preview = document.getElementById('preview_image');
+            const file = e.target.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // BARCODE SCANNER LOGIC
+        let html5QrCode = null;
+
+        function startScanner() {
+            const readerDiv = document.getElementById('reader');
+            
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    readerDiv.style.display = 'none';
+                    html5QrCode = null;
+                }).catch((err) => {
+                    console.error("Error stopping scanner", err);
+                });
+                return;
+            }
+
+            readerDiv.style.display = 'block';
+            html5QrCode = new Html5Qrcode("reader");
+            
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => {
+                    console.error("Error starting scanner", err);
+                    alert("Gagal mengakses kamera.");
+                    readerDiv.style.display = 'none';
+                    html5QrCode = null;
+                });
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('kd_barang').value = decodedText;
+            
+            // Stop scanner after success
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('reader').style.display = 'none';
+                    html5QrCode = null;
+                });
+            }
+        }
+    </script>
 @endsection

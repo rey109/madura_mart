@@ -36,11 +36,11 @@ class OrderController extends Controller
      */
     public function create()
     {
-        return view('order.create', [
-            'title' => 'Order',
-            'clients' => Client::all(),
-            'products' => Product::all()
-        ]);
+        $title = 'Order';
+        $clients = Client::all();
+        $products = Product::all();
+        $discounts = \App\Models\Discount::active()->get();
+        return view('order.create', compact('clients', 'products', 'discounts', 'title'));
     }
 
     /**
@@ -50,6 +50,7 @@ class OrderController extends Controller
     {
         try {
             $request->validate([
+                'no_order' => 'nullable|unique:orders,no_order',
                 'tgl_pemesanan' => 'required|date',
                 'id_pelanggan' => 'required|exists:clients,id',
                 'status_pemesanan' => 'required|in:draft,dipesan,diproses,dikirim,sampai tujuan,diterima,selesai,dibatalkan pembeli,dibatalkan penjual',
@@ -60,7 +61,12 @@ class OrderController extends Controller
                 'quantities.*' => 'numeric|min:1',
             ]);
 
-            $order = Order::storeAsSet($request->all());
+            $data = $request->all();
+            if (($data['no_order'] ?? '') === '[Auto Generated]') {
+                unset($data['no_order']);
+            }
+
+            $order = Order::storeAsSet($data);
 
             return redirect()->route('order.index')->with('simpan', 'Pemesanan berhasil disimpan. Total: Rp ' . number_format($order->total_bayar));
 

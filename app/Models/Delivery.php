@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasAutoNumber;
 
 /**
  * Class Delivery
@@ -19,7 +20,19 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Delivery extends Model
 {
+    use HasAutoNumber;
+
     protected $fillable = ['tgl_kirim', 'id_kurir', 'id_pemesanan', 'bukti_foto', 'no_invoice'];
+
+    public function getAutoNumberField(): string
+    {
+        return 'no_invoice';
+    }
+
+    public function getAutoNumberPrefix(): string
+    {
+        return 'INV';
+    }
 
     /**
      * Get the courier handling this delivery.

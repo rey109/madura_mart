@@ -5,149 +5,313 @@
 @endsection
 
 @section('purchase')
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
-        <div class="container-fluid py-1 px-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ $title }}</li>
-                </ol>
-                <h6 class="font-weight-bolder mb-0">{{ $title }}</h6>
-            </nav>
-            <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-                <div class="ms-md-auto pe-md-3 d-flex align-items-center"></div>
-                <ul class="navbar-nav  justify-content-end">
-                    <li class="nav-item d-flex align-items-center">
-                        <div class="mx-3">
-                            <a href="{{ route('purchase.create') }}" class="btn bg-gradient-primary btn-sm mb-0">Add New {{ $title }}</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <style>
+        .pos-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: white;
+            padding: 20px;
+        }
+        .header-box {
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #f8f9fa;
+            color: #344767;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        .btn-add-new {
+            background-color: #cb0c9f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            padding: 10px 20px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-add-new:hover {
+            background-color: #b10a8b;
+            color: white;
+        }
+        .section-title {
+            color: #8392ab;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: #e9ecef;
+            margin-left: 15px;
+        }
+        .table-custom thead th {
+            background-color: #f8f9fa !important;
+            color: #8392ab !important;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            border-bottom: 1px solid #e9ecef;
+            padding: 12px 10px;
+            white-space: nowrap;
+        }
+        .table-custom tbody td {
+            font-size: 12px;
+            color: #555;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+            padding: 10px;
+        }
+        .total-pay-badge {
+            background-color: #cb0c9f;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 11px;
+            display: inline-block;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #e9ecef;
+            background-color: #fff;
+            color: #344767;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            margin: 0 2px;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #f8f9fa;
+            color: #cb0c9f;
+        }
+        .product-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+    </style>
 
     <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card mb-4">
-                    <div class="card-header pb-0">
-                        <h6>{{ $title }} Data</h6>
-                    </div>
-                    <div class="card-body px-0 pt-0 pb-2">
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">No Nota</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tanggal</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Distributor</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Bayar</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($datas as $nmr => $data)
-                                        <tr>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0 ps-3">{{ $datas->firstItem() + $nmr }}</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0">{{ $data->no_nota }}</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0">{{ $data->tgl_nota }}</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0">{{ $data->distributor->nama_distributor ?? '-' }}</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0">Rp {{ number_format($data->total_bayar) }}</p>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <button type="button" class="btn btn-link text-primary px-2 mb-0" data-bs-toggle="modal" data-bs-target="#detailModal{{ $data->id }}" title="View Details">
-                                                    <i class="fas fa-eye text-primary" style="font-size: 18px;"></i>
-                                                </button>
-                                                <a href="{{ route('purchase.edit', $data->id) }}" class="btn btn-link text-info px-2 mb-0" data-toggle="tooltip" title="Edit">
-                                                    <i class="fas fa-pencil-alt text-info" style="font-size: 18px;"></i>
-                                                </a>
-                                                <form action="{{ route('purchase.destroy', $data->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus data ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-link text-danger px-2 mb-0" data-toggle="tooltip" title="Hapus">
-                                                        <i class="fas fa-trash text-danger" style="font-size: 18px;"></i>
-                                                    </button>
-                                                </form>
-
-                                                <!-- Detail Modal -->
-                                                <div class="modal fade" id="detailModal{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel{{ $data->id }}" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="detailModalLabel{{ $data->id }}">Detail Pembelian: {{ $data->no_nota }}</h5>
-                                                                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-                                                            <div class="modal-body text-start">
-                                                                <div class="row mb-3">
-                                                                    <div class="col-4">
-                                                                        <p class="text-xs text-secondary mb-0">Tanggal:</p>
-                                                                        <p class="text-sm font-weight-bold">{{ $data->tgl_nota }}</p>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <p class="text-xs text-secondary mb-0">Distributor:</p>
-                                                                        <p class="text-sm font-weight-bold">{{ $data->distributor->nama_distributor ?? '-' }}</p>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <p class="text-xs text-secondary mb-0">Total Bayar:</p>
-                                                                        <p class="text-sm font-weight-bold">Rp {{ number_format($data->total_bayar) }}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="table-responsive">
-                                                                    <table class="table align-items-center mb-0">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Item</th>
-                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Cost</th>
-                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Qty</th>
-                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">Subtotal</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            @foreach($data->details as $detail)
-                                                                            <tr>
-                                                                                <td><p class="text-xs font-weight-bold mb-0 text-start">{{ $detail->product->nama_barang ?? 'Unknown' }}</p></td>
-                                                                                <td class="text-center"><p class="text-xs font-weight-bold mb-0">Rp {{ number_format($detail->harga_beli) }}</p></td>
-                                                                                <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $detail->jumlah_beli }}</p></td>
-                                                                                <td class="text-end"><p class="text-xs font-weight-bold mb-0">Rp {{ number_format($detail->subtotal) }}</p></td>
-                                                                            </tr>
-                                                                            @endforeach
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="px-4 py-3 border-top">
-                            {{ $datas->links('pagination::bootstrap-5') }}
-                        </div>
-                    </div>
+        
+        <div class="header-box mb-4">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-clipboard-list"></i>
                 </div>
+                <div>
+                    <h5 class="mb-1" style="font-weight: 700; color: #444;">Purchase</h5>
+                    <p class="mb-0 text-muted" style="font-size: 13px;">Daftar semua data pembelian produk</p>
+                </div>
+            </div>
+            <div>
+                <a href="{{ route('purchase.create') }}" class="btn-add-new">
+                    <i class="fas fa-plus me-1"></i> Add New Purchase
+                </a>
+            </div>
+        </div>
+
+        <div class="pos-card">
+            <div class="section-title">PURCHASE DATA</div>
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center">NO</th>
+                            <th>INVOICE NO</th>
+                            <th>INVOICE DATE</th>
+                            <th>DISTRIBUTOR</th>
+                            <th>PRODUCT</th>
+                            <th>EXPIRED DATE</th>
+                            <th class="text-center">STOCK</th>
+                            <th>SELLING PRICE</th>
+                            <th>PURCHASE PRICE</th>
+                            <th>SELLING MARGIN</th>
+                            <th class="text-center">QTY</th>
+                            <th class="text-center">IMAGE</th>
+                            <th>SUB TOTAL</th>
+                            <th class="text-center">TOTAL PAY</th>
+                            <th class="text-center">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $no = 1; @endphp
+                        @foreach ($datas as $purchase)
+                            @foreach ($purchase->details as $index => $detail)
+                                <tr>
+                                    <td class="text-center font-weight-bold" style="color: #8392ab;">{{ $no++ }}</td>
+                                    <td class="font-weight-bold">{{ $purchase->no_nota }}</td>
+                                    <td>{{ $purchase->tgl_nota }}</td>
+                                    <td>{{ $purchase->distributor->nama_distributor ?? '-' }}</td>
+                                    <td>{{ $detail->product->nama_barang ?? 'Unknown' }}</td>
+                                    <td>{{ $detail->product->tgl_expired ?? '-' }}</td>
+                                    <td class="text-center">{{ $detail->product->stok ?? 0 }}</td>
+                                    <td>Rp {{ number_format($detail->harga_beli + $detail->margin_jual) }}</td>
+                                    <td>Rp {{ number_format($detail->harga_beli) }}</td>
+                                    <td>Rp {{ number_format($detail->margin_jual) }}</td>
+                                    <td class="text-center">{{ $detail->jumlah_beli }}</td>
+                                    <td class="text-center">
+                                        @if(isset($detail->product->foto_barang) && $detail->product->foto_barang)
+                                            <img src="{{ asset('storage/' . $detail->product->foto_barang) }}" class="product-img" alt="product">
+                                        @else
+                                            <div class="product-img d-flex align-items-center justify-content-center bg-light text-muted" style="font-size: 10px;">No Img</div>
+                                        @endif
+                                    </td>
+                                    <td class="font-weight-bold">Rp {{ number_format($detail->subtotal) }}</td>
+                                    <td class="text-center">
+                                        @if($index === 0)
+                                            <!-- Only show Total Pay once per invoice, or show on every row as requested by photo? Photo shows on every row! -->
+                                            <span class="total-pay-badge">Rp {{ number_format($purchase->total_bayar) }}</span>
+                                        @else
+                                            <span class="total-pay-badge">Rp {{ number_format($purchase->total_bayar) }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="action-btn" title="Edit" onclick="requirePasswordForEdit('{{ route('purchase.edit', $purchase->id) }}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form id="delete-form-{{ $purchase->id }}" action="{{ route('purchase.destroy', $purchase->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="action-btn" title="Delete" onclick="requirePasswordForDelete('delete-form-{{ $purchase->id }}')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                        
+                        @if($datas->isEmpty())
+                            <tr>
+                                <td colspan="15" class="text-center py-4 text-muted">Belum ada data pembelian.</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                {{ $datas->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
 
+    @push('scripts')
+    <script>
+        // Password default untuk Kepala Perpus / Atasan
+        const BOSS_PASSWORD = "123";
+
+        function requirePasswordForEdit(url) {
+            swal({
+                title: "Password required!",
+                text: "Write your boss's password:",
+                type: "input",
+                inputType: "password",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                confirmButtonColor: "#cb0c9f",
+                confirmButtonText: "OK",
+                cancelButtonText: "CANCEL",
+                animation: "slide-from-top",
+                inputPlaceholder: ".........."
+            }, function(inputValue) {
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Password tidak boleh kosong!");
+                    return false;
+                }
+                
+                if (inputValue === BOSS_PASSWORD) {
+                    swal({
+                        title: "Nice!",
+                        text: "Your password is correct!",
+                        type: "success",
+                        confirmButtonColor: "#cb0c9f",
+                        confirmButtonText: "OK",
+                        closeOnConfirm: true
+                    }, function() {
+                        window.location.href = url;
+                    });
+                } else {
+                    swal.showInputError("Password salah!");
+                    return false;
+                }
+            });
+        }
+
+        function requirePasswordForDelete(formId) {
+            swal({
+                title: "Password required!",
+                text: "Write your boss's password:",
+                type: "input",
+                inputType: "password",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                confirmButtonColor: "#cb0c9f",
+                confirmButtonText: "OK",
+                cancelButtonText: "CANCEL",
+                animation: "slide-from-top",
+                inputPlaceholder: ".........."
+            }, function(inputValue) {
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Password tidak boleh kosong!");
+                    return false;
+                }
+                
+                if (inputValue === BOSS_PASSWORD) {
+                    swal({
+                        title: "Are you sure want to delete?",
+                        text: "Your will not be able to recover this data!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#ea0606",
+                        confirmButtonText: "YES, DELETE IT!",
+                        cancelButtonText: "CANCEL",
+                        closeOnConfirm: false
+                    }, function(isConfirm) {
+                        if (isConfirm) {
+                            document.getElementById(formId).submit();
+                        }
+                    });
+                } else {
+                    swal.showInputError("Password salah!");
+                    return false;
+                }
+            });
+        }
+    </script>
+    @endpush
 @endsection
 

@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HasAutoNumber;
+use App\Models\Product;
+use App\Models\PurchaseDetail;
+use App\Models\SaleDetail;
 
 /**
  * Class Sale
@@ -14,7 +18,19 @@ use Illuminate\Support\Facades\DB;
  */
 class Sale extends Model
 {
+    use HasAutoNumber;
+
     protected $fillable = ['no_struk', 'tgl_jual', 'total_bayar'];
+
+    public function getAutoNumberField(): string
+    {
+        return 'no_struk';
+    }
+
+    public function getAutoNumberPrefix(): string
+    {
+        return 'SALE';
+    }
 
     /**
      * Store a complete sale set (Header + Details) and update stock.
@@ -46,18 +62,30 @@ class Sale extends Model
                 // Decrease Stock
                 $product->decrement('stok', $qty);
 
+                // Calculate Margin (Profit)
+                $latestPurchase = PurchaseDetail::where('id_barang', $productId)->latest()->first();
+                $buyPrice = $latestPurchase ? $latestPurchase->harga_beli : ($product->harga_jual * 0.8); // Fallback to 20% margin if no purchase history
+                $itemMargin = $product->harga_jual - $buyPrice;
+
                 $details[] = [
                     'id_barang' => $productId,
                     'harga_jual' => $product->harga_jual,
                     'jumlah_jual' => $qty,
-                    'subtotal' => $subtotal
+                    'subtotal' => $subtotal,
+                    'diskon' => 0, // Currently transaction-level, can be expanded to item-level
+                    'margin' => $itemMargin
                 ];
             }
 
+            // Apply Transaction Discount
+            $finalTotal = $total_bayar - ($data['total_diskon'] ?? 0);
+
             $sale = self::create([
-                'no_struk' => $data['no_struk'],
+                'no_struk' => $data['no_struk'] ?? null,
                 'tgl_jual' => $data['tgl_jual'],
-                'total_bayar' => $total_bayar
+                'total_bayar' => $finalTotal,
+                'id_diskon' => $data['id_diskon'] ?? null,
+                'total_diskon' => $data['total_diskon'] ?? 0
             ]);
 
             foreach ($details as $detail) {

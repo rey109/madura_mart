@@ -92,9 +92,13 @@
                                                                         <p class="text-xs text-secondary mb-0">Tanggal Jual:</p>
                                                                         <p class="text-sm font-weight-bold">{{ $data->tgl_jual }}</p>
                                                                     </div>
-                                                                    <div class="col-6">
+                                                                    <div class="col-4">
                                                                         <p class="text-xs text-secondary mb-0">Total Bayar:</p>
                                                                         <p class="text-sm font-weight-bold">Rp {{ number_format($data->total_bayar) }}</p>
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <p class="text-xs text-secondary mb-0 text-success">Diskon:</p>
+                                                                        <p class="text-sm font-weight-bold text-success">- Rp {{ number_format($data->total_diskon ?? 0) }}</p>
                                                                     </div>
                                                                 </div>
                                                                 <div class="table-responsive">
@@ -104,7 +108,7 @@
                                                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Item</th>
                                                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Price</th>
                                                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Qty</th>
-                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">Subtotal</th>
+                                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">Total</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -120,8 +124,17 @@
                                                                     </table>
                                                                 </div>
                                                             </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <div class="modal-footer d-flex justify-content-between">
+                                                                <div class="text-start">
+                                                                    @php
+                                                                        $totalProfit = $data->details->sum(function($d) {
+                                                                            return $d->margin * $d->jumlah_jual;
+                                                                        });
+                                                                    @endphp
+                                                                    <span class="text-xs text-secondary">Est. Profit: </span>
+                                                                    <span class="text-sm font-weight-bold text-info">Rp {{ number_format($totalProfit - ($data->total_diskon ?? 0)) }}</span>
+                                                                </div>
+                                                                <button type="button" class="btn bg-gradient-secondary mb-0" data-bs-dismiss="modal">Close</button>
                                                             </div>
                                                         </div>
                                                     </div>

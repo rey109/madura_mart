@@ -3,19 +3,7 @@
         <li class="nav-item">
         <a class="nav-link  @if ($title === 'Dashboard') active @endif" href="{{route('dashboard.index')}}">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>shop </title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                <g transform="translate(-1716.000000, -439.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                    <g transform="translate(1716.000000, 291.000000)">
-                    <g transform="translate(0.000000, 148.000000)">
-                        <path class="color-background opacity-6" d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z"></path>
-                        <path class="color-background" d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z"></path>
-                    </g>
-                    </g>
-                </g>
-                </g>
-            </svg>
+                <i class="ni ni-shop text-xs text-primary opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Dashboard</span>
         </a>
@@ -95,7 +83,7 @@
         </a>
         </li>
         <li class="nav-item">
-        <a class="nav-link @if ($title === 'Sale') active @endif" href="{{route('sale.index')}}">
+        <a class="nav-link @if ($title === 'Sale') active @endif" href="{{route('sale.create')}}">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
             <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="60px" height="60px" viewBox="0 0 18 18"><path d="m15.8135,8.0635c-.1924,0-.3838-.0732-.5303-.2197l-5.7705-5.7705c-.0469-.0474-.1104-.0732-.1768-.0732H3.75c-.4141,0-.75-.3359-.75-.75s.3359-.75.75-.75h5.5859c.4629,0,.915.1875,1.2393.5146l5.7686,5.7686c.293.293.293.7676,0,1.0605-.1465.1465-.3379.2197-.5303.2197Z" fill="#1c1f21" stroke-width="0" data-color="color-2"></path><path d="m14.1797,9.1191l-5.1045-5.1045c-.3242-.3271-.7764-.5146-1.2393-.5146H2.25c-.4141,0-.75.3359-.75.75v5.5859c0,.4663.1816.9058.5127,1.2373l5.1064,5.1064c.5361.5361,1.2402.8042,1.9443.8042s1.4082-.2681,1.9443-.8042l3.1719-3.1719c1.0723-1.0723,1.0723-2.8164,0-3.8887Zm-8.4297-.1191c-.6904,0-1.25-.5596-1.25-1.25s.5596-1.25,1.25-1.25,1.25.5596,1.25,1.25-.5596,1.25-1.25,1.25Z" stroke-width="0" fill="#1c1f21"></path></svg>
             </svg>
@@ -218,20 +206,6 @@
             </div>
             <span class="nav-link-text ms-1">Sale Reports</span>
         </a>
-        </li>
-        <li class="nav-item">
-            <hr class="horizontal dark my-3">
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:;" onclick="document.getElementById('logout-form').submit();">
-                <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i class="fas fa-sign-out-alt text-danger"></i>
-                </div>
-                <span class="nav-link-text ms-1 text-danger font-weight-bold">Logout</span>
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
         </li>
     </ul>
     </div>

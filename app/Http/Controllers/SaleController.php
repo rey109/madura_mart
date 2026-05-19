@@ -36,9 +36,12 @@ class SaleController extends Controller
      */
     public function create()
     {
+        $products = Product::all();
+        $discounts = \App\Models\Discount::active()->get();
         return view('sale.create', [
             'title' => 'Sale',
-            'products' => Product::all()
+            'products' => $products,
+            'discounts' => $discounts
         ]);
     }
 
@@ -51,7 +54,7 @@ class SaleController extends Controller
         try {
             // Validate Basic Info
             $request->validate([
-                'no_struk' => 'required|unique:sales,no_struk',
+                'no_struk' => 'nullable|unique:sales,no_struk',
                 'tgl_jual' => 'required|date',
                 'products' => 'required|array',
                 'products.*' => 'exists:products,id',
@@ -59,8 +62,13 @@ class SaleController extends Controller
                 'quantities.*' => 'numeric|min:1',
             ]);
 
+            $data = $request->all();
+            if (($data['no_struk'] ?? '') === '[Auto Generated]') {
+                unset($data['no_struk']);
+            }
+
             // Atomic 'Header + Details' set saving in the Model
-            $sale = Sale::storeAsSet($request->all());
+            $sale = Sale::storeAsSet($data);
 
             return redirect()->route('sale.index')->with('simpan', "Penjualan $sale->no_struk berhasil disimpan.");
 

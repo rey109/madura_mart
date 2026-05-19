@@ -14,30 +14,32 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('dashboard.index');
-    });
-
-    Route::resource('dashboard', DashboardController::class);
-    Route::resource('distributor', DistributorController::class);
-    Route::resource('client', ClientController::class);
-    Route::resource('courier', CourierController::class);
-    Route::get('/product/trash', [ProductController::class, 'trash'])->name('product.trash');
-    Route::get('/product/restore/{id}', [ProductController::class, 'restore'])->name('product.restore');
-    Route::delete('/product/force-delete/{id}', [ProductController::class, 'forceDelete'])->name('product.forceDelete');
-    Route::resource('product', ProductController::class);
-    Route::resource('purchase', PurchaseController::class);
-    Route::resource('order', OrderController::class);
-    Route::resource('sale', SaleController::class);
-    Route::resource('delivery', DeliveryController::class);
-    Route::controller(ReportController::class)->group(function () {
-        Route::get('/report/distributor', 'distributor')->name('report.distributor');
-        Route::get('/report/product', 'product')->name('report.product');
-        Route::get('/report/purchase', 'purchase')->name('report.purchase');
-        Route::get('/report/order', 'order')->name('report.order');
-        Route::get('/report/sale', 'sale')->name('report.sale');
-    });
-
-    Route::resource('user', UserController::class);
+Route::get('/test-auth', function () {
+    return 'Authentication is removed!';
 });
+
+Route::get('/', function () {
+    return redirect()->route('dashboard.index');
+});
+
+Route::resource('dashboard', DashboardController::class);
+Route::resource('distributor', DistributorController::class);
+Route::resource('client', ClientController::class);
+Route::resource('courier', CourierController::class);
+Route::get('/product/trash', [ProductController::class, 'trash'])->name('product.trash');
+Route::get('/product/restore/{id}', [ProductController::class, 'restore'])->name('product.restore');
+Route::delete('/product/force-delete/{id}', [ProductController::class, 'forceDelete'])->name('product.forceDelete');
+Route::resource('product', ProductController::class);
+Route::resource('purchase', PurchaseController::class);
+Route::resource('order', OrderController::class);
+Route::resource('sale', SaleController::class);
+Route::resource('delivery', DeliveryController::class);
+Route::controller(ReportController::class)->group(function () {
+    Route::get('/report/distributor', 'distributor')->name('report.distributor');
+    Route::get('/report/product', 'product')->name('report.product');
+    Route::get('/report/purchase', 'purchase')->name('report.purchase');
+    Route::get('/report/order', 'order')->name('report.order');
+    Route::get('/report/sale', 'sale')->name('report.sale');
+});
+
+Route::resource('user', UserController::class);

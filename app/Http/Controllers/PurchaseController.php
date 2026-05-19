@@ -52,7 +52,7 @@ class PurchaseController extends Controller
     {
         try {
             $request->validate([
-                'no_nota' => 'required|unique:purchases,no_nota',
+                'no_nota' => 'nullable|unique:purchases,no_nota',
                 'tgl_nota' => 'required|date',
                 'id_distributor' => 'required|exists:distributors,id',
                 'products' => 'required|array',
@@ -63,8 +63,13 @@ class PurchaseController extends Controller
                 'quantities.*' => 'numeric|min:1',
             ]);
 
+            $data = $request->all();
+            if (($data['no_nota'] ?? '') === '[Auto Generated]') {
+                unset($data['no_nota']);
+            }
+
             // Delegate logic to the Model for atomic 'Header + Details' set saving
-            $purchase = Purchase::storeAsSet($request->all());
+            $purchase = Purchase::storeAsSet($data);
 
             return redirect()->route('purchase.index')->with('simpan', "Pembelian $purchase->no_nota berhasil disimpan.");
 

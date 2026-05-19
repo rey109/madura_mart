@@ -52,7 +52,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">No Invoice</label>
-                                    <input type="text" class="form-control" name="no_invoice" placeholder="Enter Invoice Number" required>
+                                    <input type="text" class="form-control bg-light" name="no_invoice" value="[Auto Generated]" readonly>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Bukti Foto (URL)</label>
