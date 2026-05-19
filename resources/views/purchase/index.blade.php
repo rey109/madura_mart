@@ -198,7 +198,6 @@
                                     </td>
                                     <td class="text-center">
                                         @if(auth()->user()->role === 'owner')
-                                            {{-- Owner: langsung edit tanpa password --}}
                                             <a href="{{ route('purchase.edit', $purchase->id) }}" class="action-btn" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -210,7 +209,6 @@
                                                 </button>
                                             </form>
                                         @else
-                                            {{-- Admin/Staf: butuh password atasan --}}
                                             <button type="button" class="action-btn" title="Edit" onclick="requirePasswordForEdit('{{ route('purchase.edit', $purchase->id) }}')">
                                                 <i class="fas fa-edit"></i>
                                             </button>
